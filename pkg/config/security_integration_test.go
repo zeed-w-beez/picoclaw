@@ -19,7 +19,7 @@ import (
 func TestJSONUnmarshalPrivateFields(t *testing.T) {
 	type testStruct struct {
 		PublicField  string `json:"public"`
-		privateField string
+		privateField string // unexported: encoding/json ignores even if JSON has "private"
 	}
 
 	data := `{"public": "pub", "privateField": "priv"}`

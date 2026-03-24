@@ -14,11 +14,15 @@ import (
 	"github.com/sipeed/picoclaw/pkg/config"
 )
 
+func testPicoConfig(token string) config.PicoConfig {
+	var c config.PicoConfig
+	c.SetToken(token)
+	return c
+}
+
 func newTestPicoHTTP(t *testing.T) *PicoChannel {
 	t.Helper()
-	cfg := config.PicoConfig{}
-	cfg.SetToken("tok")
-	ch, err := NewPicoChannel(cfg, bus.NewMessageBus())
+	ch, err := NewPicoChannel(testPicoConfig("tok"), bus.NewMessageBus())
 	if err != nil {
 		t.Fatal(err)
 	}
