@@ -186,3 +186,37 @@ func TestBuildWsURLPrefersForwardedHTTPOverTLS(t *testing.T) {
 		t.Fatalf("buildWsURL() = %q, want %q", got, "ws://chat.example.com:18800/pico/ws")
 	}
 }
+
+func TestBuildWsURLUsesWSSWhenForwardedHeaderProtoIsHTTPS(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.json")
+	h := NewHandler(configPath)
+
+	cfg := config.DefaultConfig()
+	cfg.Gateway.Host = "0.0.0.0"
+	cfg.Gateway.Port = 18790
+
+	req := httptest.NewRequest("GET", "http://10.0.0.1/api/pico/token", nil)
+	req.Host = "chat.example.com"
+	req.Header.Set("Forwarded", `for=203.0.113.1;proto=https;host=chat.example.com`)
+
+	if got := h.buildWsURL(req, cfg); got != "wss://chat.example.com:18800/pico/ws" {
+		t.Fatalf("buildWsURL() = %q, want %q", got, "wss://chat.example.com:18800/pico/ws")
+	}
+}
+
+func TestBuildWsURLUsesWSSWhenXForwardedSslOn(t *testing.T) {
+	configPath := filepath.Join(t.TempDir(), "config.json")
+	h := NewHandler(configPath)
+
+	cfg := config.DefaultConfig()
+	cfg.Gateway.Host = "0.0.0.0"
+	cfg.Gateway.Port = 18790
+
+	req := httptest.NewRequest("GET", "http://10.0.0.1/api/pico/token", nil)
+	req.Host = "chat.example.com"
+	req.Header.Set("X-Forwarded-Ssl", "on")
+
+	if got := h.buildWsURL(req, cfg); got != "wss://chat.example.com:18800/pico/ws" {
+		t.Fatalf("buildWsURL() = %q, want %q", got, "wss://chat.example.com:18800/pico/ws")
+	}
+}

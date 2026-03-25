@@ -75,6 +75,29 @@ func requestHostName(r *http.Request) string {
 	return "127.0.0.1"
 }
 
+// forwardedRFC7239Proto returns the proto value from the first Forwarded element (RFC 7239), or "".
+func forwardedRFC7239Proto(r *http.Request) string {
+	raw := strings.TrimSpace(r.Header.Get("Forwarded"))
+	if raw == "" {
+		return ""
+	}
+	first := strings.TrimSpace(strings.Split(raw, ",")[0])
+	for _, part := range strings.Split(first, ";") {
+		part = strings.TrimSpace(part)
+		idx := strings.IndexByte(part, '=')
+		if idx <= 0 {
+			continue
+		}
+		key := strings.ToLower(strings.TrimSpace(part[:idx]))
+		if key != "proto" {
+			continue
+		}
+		v := strings.Trim(strings.TrimSpace(part[idx+1:]), `"'`)
+		return strings.ToLower(v)
+	}
+	return ""
+}
+
 func requestWSScheme(r *http.Request) string {
 	if forwarded := strings.TrimSpace(r.Header.Get("X-Forwarded-Proto")); forwarded != "" {
 		proto := strings.ToLower(strings.TrimSpace(strings.Split(forwarded, ",")[0]))
@@ -84,6 +107,19 @@ func requestWSScheme(r *http.Request) string {
 		if proto == "http" || proto == "ws" {
 			return "ws"
 		}
+	}
+
+	if p := forwardedRFC7239Proto(r); p != "" {
+		if p == "https" || p == "wss" {
+			return "wss"
+		}
+		if p == "http" || p == "ws" {
+			return "ws"
+		}
+	}
+
+	if strings.EqualFold(strings.TrimSpace(r.Header.Get("X-Forwarded-Ssl")), "on") {
+		return "wss"
 	}
 
 	if r.TLS != nil {
@@ -99,6 +135,12 @@ func requestHTTPScheme(r *http.Request) string {
 		if proto == "https" {
 			return "https"
 		}
+	}
+	if p := forwardedRFC7239Proto(r); p == "https" {
+		return "https"
+	}
+	if strings.EqualFold(strings.TrimSpace(r.Header.Get("X-Forwarded-Ssl")), "on") {
+		return "https"
 	}
 	if r.TLS != nil {
 		return "https"

@@ -13,8 +13,15 @@ export function normalizeWsUrlForBrowser(wsUrl: string): string {
 
     if (isLocalHost && !isBrowserLocal) {
       parsedUrl.hostname = window.location.hostname
-      finalWsUrl = parsedUrl.toString()
     }
+
+    // HTTPS pages cannot open ws:// (mixed content). Backend may still return ws
+    // when TLS terminates at a reverse proxy without X-Forwarded-Proto.
+    if (window.location.protocol === "https:" && parsedUrl.protocol === "ws:") {
+      parsedUrl.protocol = "wss:"
+    }
+
+    finalWsUrl = parsedUrl.toString()
   } catch (error) {
     console.warn("Could not parse ws_url:", error)
   }
