@@ -67,6 +67,14 @@ PicoClaw stores data in your configured workspace (default: `~/.picoclaw/workspa
 
 > **Note:** Changes to `AGENT.md`, `SOUL.md`, `USER.md` and `memory/MEMORY.md` are automatically detected at runtime via file modification time (mtime) tracking. You do **not** need to restart the gateway after editing these files — the agent picks up the new content on the next request.
 
+### Web launcher dashboard
+
+When you run **picoclaw-launcher** and use the browser UI, you sign in first. The dashboard token and session signing material are **generated in memory each run** (new after every restart); check the terminal output for the token.
+
+- **Where it lives**: Same folder as `config.json` (or the file pointed to by `PICOCLAW_CONFIG`). The launcher-specific file is named `launcher-config.json`.
+- **Everyday use**: Enter the token on the login page. You can also open a page URL that includes the `token` parameter.
+- **Stable token**: Set `PICOCLAW_LAUNCHER_TOKEN` to use a fixed dashboard token for that process.
+
 ### Skill Sources
 
 By default, skills are loaded from:

@@ -51,6 +51,14 @@ PicoClaw 将数据存储在您配置的工作区中（默认：`~/.picoclaw/work
 
 > **提示：** 对 `AGENT.md`、`SOUL.md`、`USER.md` 和 `memory/MEMORY.md` 的修改会通过文件修改时间（mtime）在运行时自动检测。**无需重启 gateway**，Agent 将在下一次请求时自动加载最新内容。
 
+### Web 启动器控制台
+
+用 **picoclaw-launcher** 在浏览器里打开控制台时，需要先登录。访问口令与浏览器会话签名密钥均在**每次启动时在内存中重新生成**（重启后口令会变）；请查看启动时终端输出的口令。
+
+- **文件在哪**：与 `config.json` 同一目录（若设置了 `PICOCLAW_CONFIG`，则与它所指的文件同目录）。启动器专用配置的文件名是 `launcher-config.json`。
+- **平时怎么用**：在浏览器里按登录页提示输入口令即可；也支持在页面链接里带上`token`参数。
+- **固定口令**：可通过环境变量 `PICOCLAW_LAUNCHER_TOKEN` 为当前进程指定口令。
+
 ### 技能来源 (Skill Sources)
 
 默认情况下，技能会按以下顺序加载：
